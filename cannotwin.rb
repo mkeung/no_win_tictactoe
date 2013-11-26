@@ -3,20 +3,21 @@ class TicTacToe
 	@@comp_wins = 0
 	@@total_games = 0
 
-	attr_reader :gameended
+	attr_reader :game_ended
 
 	def initialize
-		@gameboard = [1,2,3,4,5,6,7,8,9]
+		@game_board = [1,2,3,4,5,6,7,8,9]
 		@available = [true,true,true,true,true,true,true,true,true]
-		@userboard = [0,0,0,0,0,0,0,0,0]
-		@compboard = [0,0,0,0,0,0,0,0,0]
-		@gameended = false
+		@user_board = [0,0,0,0,0,0,0,0,0]
+		@comp_board = [0,0,0,0,0,0,0,0,0]
+		@game_ended = false
+		@turns_taken = 0
 	end
 
-	def display_gameboard
-		puts "#{@gameboard[0]}|#{@gameboard[1]}|#{@gameboard[2]}"
-		puts "#{@gameboard[3]}|#{@gameboard[4]}|#{@gameboard[5]}"
-		puts "#{@gameboard[6]}|#{@gameboard[7]}|#{@gameboard[8]}"
+	def display
+		puts "#{@game_board[0]}|#{@game_board[1]}|#{@game_board[2]}"
+		puts "#{@game_board[3]}|#{@game_board[4]}|#{@game_board[5]}"
+		puts "#{@game_board[6]}|#{@game_board[7]}|#{@game_board[8]}"
 	end
 
 	def user_select #user is X's
@@ -25,13 +26,13 @@ class TicTacToe
 		# make sure selection input is within the valid range
 		while invalid_selection do
 			puts "enter a number from the displayed spots"
-			display_gameboard
+			display
 			selection = gets.chomp.to_i
 
 			if (selection < 1) || (selection > 9)
 				puts "I don't understand your entry"
 			else
-				selection_index = @gameboard.index(selection)
+				selection_index = @game_board.index(selection)
 
 				#make sure it's not taken
 				if @available[selection_index]
@@ -42,15 +43,46 @@ class TicTacToe
 			end
 		end
 
-		#update game with selection if the above checks are ok
-		@gameboard[selection_index] = "X"
+		# update game with selection if the above checks are ok
+		@game_board[selection_index] = "X"
 		@available[selection_index] = false
-		@userboard[selection_index] = 1
+		@user_board[selection_index] = 1
+		@turns_taken += 1
 
-		#check if user won
+		# check if user won
 		if user_victory?
 			user_victory
 		end
+
+		# check if tie
+		game_tie?
+	end
+
+	def comp_select
+
+		# just select a random available spot for now
+		invalid_selection = true
+		while invalid_selection do
+			selection_index = rand(9)
+
+			if @available[selection_index]
+				invalid_selection = false
+			end
+		end
+
+		#update game with selection if the above checks are ok
+		@game_board[selection_index] = "O"
+		@available[selection_index] = false
+		@comp_board[selection_index] = 1
+		@turns_taken += 1
+
+		#check if comp won
+		if comp_victory?
+			comp_victory
+		end
+
+		# check if tie
+		game_tie?
 	end
 
 	def game_stats
@@ -62,23 +94,23 @@ class TicTacToe
 	private
 		def user_victory?
 			# horizontal check
-			if @userboard[0]+@userboard[1]+@userboard[2] == 3
+			if @user_board[0]+@user_board[1]+@user_board[2] == 3
 				return true
-			elsif @userboard[3]+@userboard[4]+@userboard[5] == 3
+			elsif @user_board[3]+@user_board[4]+@user_board[5] == 3
 				return true
-			elsif @userboard[6]+@userboard[7]+@userboard[8] == 3
+			elsif @user_board[6]+@user_board[7]+@user_board[8] == 3
 				return true
 			# vertical check
-			elsif @userboard[0]+@userboard[3]+@userboard[6] == 3
+			elsif @user_board[0]+@user_board[3]+@user_board[6] == 3
 				return true
-			elsif @userboard[1]+@userboard[4]+@userboard[7] == 3
+			elsif @user_board[1]+@user_board[4]+@user_board[7] == 3
 				return true
-			elsif @userboard[2]+@userboard[5]+@userboard[8] == 3
+			elsif @user_board[2]+@user_board[5]+@user_board[8] == 3
 				return true
 			# diagonal check
-			elsif @userboard[0]+@userboard[4]+@userboard[8] == 3
+			elsif @user_board[0]+@user_board[4]+@user_board[8] == 3
 				return true
-			elsif @userboard[6]+@userboard[4]+@userboard[2] == 3
+			elsif @user_board[6]+@user_board[4]+@user_board[2] == 3
 				return true
 
 			else
@@ -88,25 +120,39 @@ class TicTacToe
 
 		def comp_victory?
 			# horizontal check
-			if @compboard[0]+@compboard[1]+@compboard[2] == 3
+			if @comp_board[0]+@comp_board[1]+@comp_board[2] == 3
 				return true
-			elsif @compboard[3]+@compboard[4]+@compboard[5] == 3
+			elsif @comp_board[3]+@comp_board[4]+@comp_board[5] == 3
 				return true
-			elsif @compboard[6]+@compboard[7]+@compboard[8] == 3
+			elsif @comp_board[6]+@comp_board[7]+@comp_board[8] == 3
 				return true
 			# vertical check
-			elsif @compboard[0]+@compboard[3]+@compboard[6] == 3
+			elsif @comp_board[0]+@comp_board[3]+@comp_board[6] == 3
 				return true
-			elsif @compboard[1]+@compboard[4]+@compboard[7] == 3
+			elsif @comp_board[1]+@comp_board[4]+@comp_board[7] == 3
 				return true
-			elsif @compboard[2]+@compboard[5]+@compboard[8] == 3
+			elsif @comp_board[2]+@comp_board[5]+@comp_board[8] == 3
 				return true
 			# diagonal check
-			elsif @compboard[0]+@compboard[4]+@compboard[8] == 3
+			elsif @comp_board[0]+@comp_board[4]+@comp_board[8] == 3
 				return true
-			elsif @compboard[6]+@compboard[4]+@compboard[2] == 3
+			elsif @comp_board[6]+@comp_board[4]+@comp_board[2] == 3
 				return true
 
+			else
+				return false
+			end
+		end
+
+		def game_tie?
+			if (@turns_taken == 9) && @game_ended
+				# someone won on last turn
+				return false
+			elsif @turns_taken == 9
+				puts "Tie game. Nobody wins."
+				@game_ended = true
+				@@total_games += 1
+				return true
 			else
 				return false
 			end
@@ -116,24 +162,23 @@ class TicTacToe
 			puts "wow...you somehow won...IMPOSSIBLE!"
 			@@user_wins += 1
 			@@total_games += 1
-			@gameended = true
+			@game_ended = true
 		end
 
 		def comp_victory
 			puts "*yawn*...give up yet?"
 			@@comp_wins += 1
 			@@total_games += 1
-			@gameended = true
+			@game_ended = true
 		end
 end
 
 # ask the user if they want to play again
 def playagain?
 	puts "Play again? (Y or N)"
-	answered_correctly = false
 
-	while answered_correctly == false do
-
+	# will break upon return
+	while true do
 		response = gets.chomp.downcase
 
 		if (response == "y") || (response == "yes")
@@ -158,10 +203,11 @@ play = true
 while play == true  do
 	game = TicTacToe.new
 
-	while game.gameended == false do
+	while game.game_ended == false do
 		game.user_select
+		game.comp_select unless game.game_ended
 	end
-
+	game.display
 	game.game_stats
 	play = playagain?
 end
