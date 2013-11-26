@@ -50,7 +50,7 @@ class TicTacToe
 		@turns_taken += 1
 
 		# check if user won
-		if user_victory?
+		if victory?(@user_board)
 			user_victory
 		end
 
@@ -60,7 +60,22 @@ class TicTacToe
 
 	def comp_select
 
-		# just select a random available spot for now
+		# Logic:
+		# -- universal, priority
+		# if can win, win
+		# if other player is about to win, stop it
+
+		# -- offensive (go 1st)
+		# go corner
+		# if they go to non corner, go to adjacent corner that is not touching their move and you win when you go mid after
+		#
+		# if they go corner, go to your adjacent corner, then final corner
+
+		# -- defensive (go 2nd)
+		# go middle if going 2nd and it's available
+		# if they go non corner, pick something that touches their move
+
+		# otherwise just select a random available spot
 		invalid_selection = true
 		while invalid_selection do
 			selection_index = rand(9)
@@ -77,7 +92,7 @@ class TicTacToe
 		@turns_taken += 1
 
 		#check if comp won
-		if comp_victory?
+		if victory?(@comp_board)
 			comp_victory
 		end
 
@@ -92,51 +107,25 @@ class TicTacToe
 	end
 
 	private
-		def user_victory?
+		def victory?(player_board)
 			# horizontal check
-			if @user_board[0]+@user_board[1]+@user_board[2] == 3
+			if player_board[0]+player_board[1]+player_board[2] == 3
 				return true
-			elsif @user_board[3]+@user_board[4]+@user_board[5] == 3
+			elsif player_board[3]+player_board[4]+player_board[5] == 3
 				return true
-			elsif @user_board[6]+@user_board[7]+@user_board[8] == 3
+			elsif player_board[6]+player_board[7]+player_board[8] == 3
 				return true
 			# vertical check
-			elsif @user_board[0]+@user_board[3]+@user_board[6] == 3
+			elsif player_board[0]+player_board[3]+player_board[6] == 3
 				return true
-			elsif @user_board[1]+@user_board[4]+@user_board[7] == 3
+			elsif player_board[1]+player_board[4]+player_board[7] == 3
 				return true
-			elsif @user_board[2]+@user_board[5]+@user_board[8] == 3
-				return true
-			# diagonal check
-			elsif @user_board[0]+@user_board[4]+@user_board[8] == 3
-				return true
-			elsif @user_board[6]+@user_board[4]+@user_board[2] == 3
-				return true
-
-			else
-				return false
-			end
-		end
-
-		def comp_victory?
-			# horizontal check
-			if @comp_board[0]+@comp_board[1]+@comp_board[2] == 3
-				return true
-			elsif @comp_board[3]+@comp_board[4]+@comp_board[5] == 3
-				return true
-			elsif @comp_board[6]+@comp_board[7]+@comp_board[8] == 3
-				return true
-			# vertical check
-			elsif @comp_board[0]+@comp_board[3]+@comp_board[6] == 3
-				return true
-			elsif @comp_board[1]+@comp_board[4]+@comp_board[7] == 3
-				return true
-			elsif @comp_board[2]+@comp_board[5]+@comp_board[8] == 3
+			elsif player_board[2]+player_board[5]+player_board[8] == 3
 				return true
 			# diagonal check
-			elsif @comp_board[0]+@comp_board[4]+@comp_board[8] == 3
+			elsif player_board[0]+player_board[4]+player_board[8] == 3
 				return true
-			elsif @comp_board[6]+@comp_board[4]+@comp_board[2] == 3
+			elsif player_board[6]+player_board[4]+player_board[2] == 3
 				return true
 
 			else
