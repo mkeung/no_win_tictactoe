@@ -20,16 +20,31 @@ class TicTacToe
 	end
 
 	def user_select #user is X's
-		puts "select from available spots (numbered)"
-		display_gameboard
-		selection = gets.chomp.to_i
-		selection_index = @gameboard.index(selection)
+		invalid_selection = true
 
-		# make sure selection is available, if not get it again
-		# make sure selection input is valid, if not get it again
+		# make sure selection input is within the valid range
+		while invalid_selection do
+			puts "enter a number from the displayed spots"
+			display_gameboard
+			selection = gets.chomp.to_i
+
+			if (selection < 1) || (selection > 9)
+				puts "I don't understand your entry"
+			else
+				selection_index = @gameboard.index(selection)
+
+				#make sure it's not taken
+				if @available[selection_index]
+					invalid_selection = false
+				else
+					puts "that's taken!"
+				end
+			end
+		end
 
 		#update game with selection if the above checks are ok
 		@gameboard[selection_index] = "X"
+		@available[selection_index] = false
 		@userboard[selection_index] = 1
 
 		#check if user won
