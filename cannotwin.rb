@@ -2,6 +2,8 @@ class TicTacToe
 	@@user_wins = 0
 	@@comp_wins = 0
 	@@total_games = 0
+	@@user_start = 1 # swap by * -1
+
 
 	attr_reader :game_ended
 
@@ -18,6 +20,10 @@ class TicTacToe
 		puts "#{@game_board[0]}|#{@game_board[1]}|#{@game_board[2]}"
 		puts "#{@game_board[3]}|#{@game_board[4]}|#{@game_board[5]}"
 		puts "#{@game_board[6]}|#{@game_board[7]}|#{@game_board[8]}"
+	end
+
+	def user_start
+		@@user_start
 	end
 
 	def user_select #user is X's
@@ -71,7 +77,7 @@ class TicTacToe
 		if selection_index.nil?
 			selection_index = comp_check_victory(@user_board)
 		end
-		
+
 		# -- offensive (go 1st)
 		# go corner
 		# if they go to non corner, go to adjacent corner that is not touching their move and you win when you go mid after
@@ -80,6 +86,9 @@ class TicTacToe
 
 		# -- defensive (go 2nd)
 		# go middle if going 2nd and it's available
+		if @turns_taken == 1 && @available[4]
+			selection_index = 4
+		end
 		# if they go non corner, pick something that touches their move
 
 		# otherwise just select a random available spot
@@ -110,9 +119,12 @@ class TicTacToe
 	end
 
 	def game_stats
+		puts "-----------------------------------"
 		puts "You've won #{@@user_wins} times"
 		puts "I've won #{@@comp_wins} times"
 		puts "We've played #{@@total_games} times"
+		puts "-----------------------------------"
+		@@user_start *= -1
 	end
 
 	private
@@ -147,6 +159,7 @@ class TicTacToe
 				# someone won on last turn
 				return false
 			elsif @turns_taken == 9
+				puts "-----------------------------------"
 				puts "Tie game. Nobody wins."
 				@game_ended = true
 				@@total_games += 1
@@ -157,6 +170,7 @@ class TicTacToe
 		end
 
 		def user_victory
+			puts "-----------------------------------"
 			puts "wow...you somehow won...IMPOSSIBLE!"
 			@@user_wins += 1
 			@@total_games += 1
@@ -164,6 +178,7 @@ class TicTacToe
 		end
 
 		def comp_victory
+			puts "-----------------------------------"
 			puts "*yawn*...give up yet?"
 			@@comp_wins += 1
 			@@total_games += 1
@@ -252,10 +267,18 @@ play = true
 while play == true  do
 	game = TicTacToe.new
 
-	while game.game_ended == false do
-		game.user_select
-		game.comp_select unless game.game_ended
+	if game.user_start == 1
+		while game.game_ended == false do
+			game.user_select
+			game.comp_select unless game.game_ended
+		end
+	else
+		while game.game_ended == false do
+			game.comp_select
+			game.user_select unless game.game_ended
+		end
 	end
+
 	game.display
 	game.game_stats
 	play = playagain?
