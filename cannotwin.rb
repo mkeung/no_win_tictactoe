@@ -63,6 +63,7 @@ class TicTacToe
 		# Logic:
 		# -- universal, priority
 		# if can win, win
+		selection_index = comp_go_for_victory
 		# if other player is about to win, stop it
 
 		# -- offensive (go 1st)
@@ -76,12 +77,14 @@ class TicTacToe
 		# if they go non corner, pick something that touches their move
 
 		# otherwise just select a random available spot
-		invalid_selection = true
-		while invalid_selection do
-			selection_index = rand(9)
+		if selection_index == false
+			invalid_selection = true
+			while invalid_selection do
+				selection_index = rand(9)
 
-			if @available[selection_index]
-				invalid_selection = false
+				if @available[selection_index]
+					invalid_selection = false
+				end
 			end
 		end
 
@@ -159,6 +162,50 @@ class TicTacToe
 			@@comp_wins += 1
 			@@total_games += 1
 			@game_ended = true
+		end
+
+		def comp_go_for_victory
+			# horizontal check
+			if @comp_board[0]+@comp_board[1]+@comp_board[2] == 2
+				return 0 if @available[0] == true
+				return 1 if @available[1] == true
+				return 2 if @available[2] == true
+			elsif @comp_board[3]+@comp_board[4]+@comp_board[5] == 2
+				return 3 if @available[3] == true
+				return 4 if @available[4] == true
+				return 5 if @available[5] == true
+			elsif @comp_board[6]+@comp_board[7]+@comp_board[8] == 2
+				return 6 if @available[6] == true
+				return 7 if @available[7] == true
+				return 8 if @available[8] == true
+
+			# vertical check
+			elsif @comp_board[0]+@comp_board[3]+@comp_board[6] == 2
+				return 0 if @available[0] == true
+				return 3 if @available[3] == true
+				return 6 if @available[6] == true
+			elsif @comp_board[1]+@comp_board[4]+@comp_board[7] == 2
+				return 1 if @available[1] == true
+				return 4 if @available[4] == true
+				return 7 if @available[7] == true
+			elsif @comp_board[2]+@comp_board[5]+@comp_board[8] == 2
+				return 2 if @available[2] == true
+				return 5 if @available[5] == true
+				return 8 if @available[8] == true
+
+			# diagonal check
+			elsif @comp_board[0]+@comp_board[4]+@comp_board[8] == 2
+				return 0 if @available[0] == true
+				return 4 if @available[4] == true
+				return 8 if @available[8] == true
+			elsif @comp_board[6]+@comp_board[4]+@comp_board[2] == 2
+				return 6 if @available[6] == true
+				return 4 if @available[4] == true
+				return 2 if @available[2] == true
+
+			else
+				return false
+			end
 		end
 end
 
