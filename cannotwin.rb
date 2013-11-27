@@ -32,9 +32,10 @@ class TicTacToe
 			if (selection < 1) || (selection > 9)
 				puts "I don't understand your entry"
 			else
-				selection_index = @game_board.index(selection)
+				# adjust for difference in display and array index
+				selection_index = selection-1
 
-				#make sure it's not taken
+				# make sure it's not taken
 				if @available[selection_index]
 					invalid_selection = false
 				else
@@ -60,12 +61,17 @@ class TicTacToe
 
 	def comp_select
 
+		selection_index = nil
+
 		# Logic:
 		# -- universal, priority
 		# if can win, win
-		selection_index = comp_go_for_victory
+		selection_index = comp_check_victory(@comp_board)
 		# if other player is about to win, stop it
-
+		if selection_index.nil?
+			selection_index = comp_check_victory(@user_board)
+		end
+		
 		# -- offensive (go 1st)
 		# go corner
 		# if they go to non corner, go to adjacent corner that is not touching their move and you win when you go mid after
@@ -77,7 +83,7 @@ class TicTacToe
 		# if they go non corner, pick something that touches their move
 
 		# otherwise just select a random available spot
-		if selection_index == false
+		if selection_index.nil?
 			invalid_selection = true
 			while invalid_selection do
 				selection_index = rand(9)
@@ -128,7 +134,7 @@ class TicTacToe
 			# diagonal check
 			elsif player_board[0]+player_board[4]+player_board[8] == 3
 				return true
-			elsif player_board[6]+player_board[4]+player_board[2] == 3
+			elsif player_board[2]+player_board[4]+player_board[6] == 3
 				return true
 
 			else
@@ -164,49 +170,56 @@ class TicTacToe
 			@game_ended = true
 		end
 
-		def comp_go_for_victory
+		def comp_check_victory(player_board)
 			# horizontal check
-			if @comp_board[0]+@comp_board[1]+@comp_board[2] == 2
-				return 0 if @available[0] == true
-				return 1 if @available[1] == true
-				return 2 if @available[2] == true
-			elsif @comp_board[3]+@comp_board[4]+@comp_board[5] == 2
-				return 3 if @available[3] == true
-				return 4 if @available[4] == true
-				return 5 if @available[5] == true
-			elsif @comp_board[6]+@comp_board[7]+@comp_board[8] == 2
-				return 6 if @available[6] == true
-				return 7 if @available[7] == true
-				return 8 if @available[8] == true
+			if player_board[0]+player_board[1]+player_board[2] == 2
+				return 0 if @available[0]
+				return 1 if @available[1]
+				return 2 if @available[2]
+			end
+			if player_board[3]+player_board[4]+player_board[5] == 2
+				return 3 if @available[3]
+				return 4 if @available[4]
+				return 5 if @available[5]
+			end
+			if player_board[6]+player_board[7]+player_board[8] == 2
+				return 6 if @available[6]
+				return 7 if @available[7]
+				return 8 if @available[8]
+			end
 
 			# vertical check
-			elsif @comp_board[0]+@comp_board[3]+@comp_board[6] == 2
-				return 0 if @available[0] == true
-				return 3 if @available[3] == true
-				return 6 if @available[6] == true
-			elsif @comp_board[1]+@comp_board[4]+@comp_board[7] == 2
-				return 1 if @available[1] == true
-				return 4 if @available[4] == true
-				return 7 if @available[7] == true
-			elsif @comp_board[2]+@comp_board[5]+@comp_board[8] == 2
-				return 2 if @available[2] == true
-				return 5 if @available[5] == true
-				return 8 if @available[8] == true
+			if player_board[0]+player_board[3]+player_board[6] == 2
+				return 0 if @available[0]
+				return 3 if @available[3]
+				return 6 if @available[6]
+			end
+			if player_board[1]+player_board[4]+player_board[7] == 2
+				return 1 if @available[1]
+				return 4 if @available[4]
+				return 7 if @available[7]
+			end
+			if player_board[2]+player_board[5]+player_board[8] == 2
+				return 2 if @available[2]
+				return 5 if @available[5]
+				return 8 if @available[8]
+			end
 
 			# diagonal check
-			elsif @comp_board[0]+@comp_board[4]+@comp_board[8] == 2
-				return 0 if @available[0] == true
-				return 4 if @available[4] == true
-				return 8 if @available[8] == true
-			elsif @comp_board[6]+@comp_board[4]+@comp_board[2] == 2
-				return 6 if @available[6] == true
-				return 4 if @available[4] == true
-				return 2 if @available[2] == true
-
-			else
-				return false
+			if player_board[0]+player_board[4]+player_board[8] == 2
+				return 0 if @available[0]
+				return 4 if @available[4]
+				return 8 if @available[8]
 			end
+			if player_board[2]+player_board[4]+player_board[6] == 2
+				return 2 if @available[2]
+				return 4 if @available[4]
+				return 6 if @available[6]
+			end
+
+			return nil
 		end
+
 end
 
 # ask the user if they want to play again
