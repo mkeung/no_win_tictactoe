@@ -4,7 +4,6 @@ class TicTacToe
 	@@total_games = 0
 	@@user_start = 1 # swap by * -1
 
-
 	attr_reader :game_ended
 
 	def initialize
@@ -14,6 +13,7 @@ class TicTacToe
 		@comp_board = [0,0,0,0,0,0,0,0,0]
 		@game_ended = false
 		@turns_taken = 0
+		@users_move_order = []
 	end
 
 	def display
@@ -51,10 +51,8 @@ class TicTacToe
 		end
 
 		# update game with selection if the above checks are ok
-		@game_board[selection_index] = "X"
-		@available[selection_index] = false
-		@user_board[selection_index] = 1
-		@turns_taken += 1
+		save_move(selection_index, @user_board, "X")
+		@users_move_order << selection_index
 
 		# check if user won
 		if victory?(@user_board)
@@ -78,18 +76,38 @@ class TicTacToe
 			selection_index = comp_check_victory(@user_board)
 		end
 
-		# -- offensive (go 1st)
+		# -- offensive play (go 1st)
 		# go corner
 		# if they go to non corner, go to adjacent corner that is not touching their move and you win when you go mid after
 		#
 		# if they go corner, go to your adjacent corner, then final corner
 
-		# -- defensive (go 2nd)
-		# go middle if going 2nd and it's available
-		if @turns_taken == 1 && @available[4]
-			selection_index = 4
+		# -- defensive play (go 2nd)
+		if (@@user_start == 1) && selection_index.nil?
+			# go middle if it's available
+			if @available[4]
+				selection_index = 4
+
+			# if user took middle 1st, take a corner
+			elsif @turns_taken == 1
+				selection_index = go_corner
+
+			# if they go non corner, pick something that touches their move
+			# *account for a non corner on 1st move
+			elsif non_corner?(@users_move_order.last(2).first) && @turns_taken == 3
+				selection_index = touch_non_corner(@users_move_order.last(2).first)
+			elsif non_corner?(@users_move_order.last)
+				selection_index = touch_non_corner(@users_move_order.last)
+
+			# if they go corner, pick a corner unless control middle
+			elsif (@comp_board[4] == 0) && corner?(@users_move_order.last)
+				selection_index = go_corner
+
+			# else go non corner
+			else
+				selection_index = go_non_corner
+			end
 		end
-		# if they go non corner, pick something that touches their move
 
 		# otherwise just select a random available spot
 		if selection_index.nil?
@@ -104,10 +122,7 @@ class TicTacToe
 		end
 
 		#update game with selection if the above checks are ok
-		@game_board[selection_index] = "O"
-		@available[selection_index] = false
-		@comp_board[selection_index] = 1
-		@turns_taken += 1
+		save_move(selection_index, @comp_board, "O")
 
 		#check if comp won
 		if victory?(@comp_board)
@@ -124,10 +139,17 @@ class TicTacToe
 		puts "I've won #{@@comp_wins} times"
 		puts "We've played #{@@total_games} times"
 		puts "-----------------------------------"
-		@@user_start *= -1
+		#@@user_start *= -1
 	end
 
 	private
+		def save_move(move_index, player_board, marker)
+			@game_board[move_index] = marker
+			@available[move_index] = false
+			player_board[move_index] = 1
+			@turns_taken += 1
+		end
+
 		def victory?(player_board)
 			# horizontal check
 			if player_board[0]+player_board[1]+player_board[2] == 3
@@ -235,7 +257,55 @@ class TicTacToe
 			return nil
 		end
 
+		def corner?(move_position)
+			corner_spots = [0, 2, 6, 8]
+			return corner_spots.include?(move_position)
+		end
+
+		def go_corner
+			corner = [0, 2, 6, 8].shuffle
+			corner.each do |x|
+				return x if @available[x]
+			end
+			return nil
+		end
+
+		def non_corner?(move_position)
+			non_corner_spots = [1, 3, 5, 7]
+			return non_corner_spots.include?(move_position)
+		end
+
+		def go_non_corner
+			non_corner = [1, 3, 5, 7].shuffle
+			non_corner.each do |x|
+				return x if @available[x]
+			end
+			return nil
+		end
+
+		def touch_non_corner(move_position)
+			case move_position
+			when 1
+				return 0 if @available[0]
+				return 2 if @available[2]
+			when 3
+				return 0 if @available[0]
+				return 6 if @available[6]
+			when 5
+				return 2 if @available[2]
+				return 8 if @available[8]
+			when 7
+				return 6 if @available[6]
+				return 8 if @available[8]
+			else
+				return nil
+			end
+		end
+
+
 end
+
+# ============================================================================
 
 # ask the user if they want to play again
 def playagain?
