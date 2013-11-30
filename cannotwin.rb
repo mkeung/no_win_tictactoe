@@ -77,6 +77,8 @@ class TicTacToe
 		end
 
 		# -- offensive play (go 1st)
+		if (@@user_start == -1) && selection_index.nil?
+		end
 		# go corner
 		# if they go to non corner, go to adjacent corner that is not touching their move and you win when you go mid after
 		#
@@ -84,16 +86,15 @@ class TicTacToe
 
 		# -- defensive play (go 2nd)
 		if (@@user_start == 1) && selection_index.nil?
-			# go middle if it's available
+			# go middle 1st if it's available
 			if @available[4]
 				selection_index = 4
-
-			# if user took middle 1st, take a corner
+			# go corner 1st if middle was taken
 			elsif @turns_taken == 1
 				selection_index = go_corner
 
 			# if they go non corner, pick something that touches their move
-			# *account for a non corner on 1st move
+			# note: account for a non corner on 1st move
 			elsif non_corner?(@users_move_order.last(2).first) && @turns_taken == 3
 				selection_index = touch_non_corner(@users_move_order.last(2).first)
 			elsif non_corner?(@users_move_order.last)
@@ -284,21 +285,27 @@ class TicTacToe
 		end
 
 		def touch_non_corner(move_position)
+			moves = []
+
 			case move_position
 			when 1
-				return 0 if @available[0]
-				return 2 if @available[2]
+				moves << 0 if @available[0]
+				moves << 2 if @available[2]
 			when 3
-				return 0 if @available[0]
-				return 6 if @available[6]
+				moves << 0 if @available[0]
+				moves << 6 if @available[6]
 			when 5
-				return 2 if @available[2]
-				return 8 if @available[8]
+				moves << 2 if @available[2]
+				moves << 8 if @available[8]
 			when 7
-				return 6 if @available[6]
-				return 8 if @available[8]
-			else
+				moves << 6 if @available[6]
+				moves << 8 if @available[8]
+			end
+
+			if moves.empty?
 				return nil
+			else
+				return moves.shuffle.first
 			end
 		end
 
