@@ -54,13 +54,8 @@ class TicTacToe
 		save_move(selection_index, @user_board, "X")
 		@users_move_order << selection_index
 
-		# check if user won
-		if victory?(@user_board)
-			user_victory
-		end
-
-		# check if tie
-		game_tie?
+		# check if game ended
+		game_end
 	end
 
 	def comp_select
@@ -125,13 +120,8 @@ class TicTacToe
 		#update game with selection if the above checks are ok
 		save_move(selection_index, @comp_board, "O")
 
-		#check if comp won
-		if victory?(@comp_board)
-			comp_victory
-		end
-
-		# check if tie
-		game_tie?
+		#check if game ended
+		game_end
 	end
 
 	def game_stats
@@ -177,36 +167,28 @@ class TicTacToe
 			end
 		end
 
-		def game_tie?
-			if (@turns_taken == 9) && @game_ended
-				# someone won on last turn
-				return false
+		def game_end
+			if victory?(@user_board)
+				@@user_wins += 1
+				@@total_games += 1
+				@game_ended = true
+				message = "YOU WON somehow...IMPOSSIBLE!"
+			elsif victory?(@comp_board)
+				@@comp_wins += 1
+				@@total_games += 1
+				@game_ended = true
+				message = "COMPUTER WINS...*yawn*...give up yet?"
 			elsif @turns_taken == 9
-				puts "-----------------------------------"
-				puts "Tie game. Nobody wins."
 				@game_ended = true
 				@@total_games += 1
-				return true
+				message = "TIE GAME. Nobody wins."
 			else
-				return false
+				return nil
 			end
+			puts "-----------------------------------"
+			puts message
 		end
 
-		def user_victory
-			puts "-----------------------------------"
-			puts "wow...you somehow won...IMPOSSIBLE!"
-			@@user_wins += 1
-			@@total_games += 1
-			@game_ended = true
-		end
-
-		def comp_victory
-			puts "-----------------------------------"
-			puts "*yawn*...give up yet?"
-			@@comp_wins += 1
-			@@total_games += 1
-			@game_ended = true
-		end
 
 		def comp_check_victory(player_board)
 			# horizontal check
