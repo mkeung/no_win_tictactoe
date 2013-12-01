@@ -72,12 +72,28 @@ class TicTacToe
 		end
 
 		# -- offensive play (go 1st)
+		# go corner on first move
 		if (@@user_start == -1) && selection_index.nil?
+			if @turns_taken == 0
+				selection_index = go_corner
+
+			# if opponent picks corner first, corner play (keep going corners to gaurantee a win)
+			elsif corner?(@users_move_order.first)
+				selection_index = go_corner
+
+
+			# if opponent picks non corner, adjacent corner not touching opponent's move then middle
+			elsif non_corner?(@users_move_order.first)
+				case @turns_taken
+				when 2
+					selection_index = go_corner(touch_array(@users_move_order.first))
+				when 4
+					selection_index = 4
+				end
+			end
+
+			# if opponent picks middle...relies on opponent screwing up. Not going to account for it and let random happen
 		end
-		# go corner
-		# if they go to non corner, go to adjacent corner that is not touching their move and you win when you go mid after
-		#
-		# if they go corner, go to your adjacent corner, then final corner
 
 		# -- defensive play (go 2nd)
 		if (@@user_start == 1) && selection_index.nil?
@@ -91,9 +107,9 @@ class TicTacToe
 			# if they go non corner, pick something that touches their move
 			# note: account for a non corner on 1st move
 			elsif non_corner?(@users_move_order.last(2).first) && @turns_taken == 3
-				selection_index = touch_non_corner(@users_move_order.last(2).first)
+				selection_index = go_touch_non_corner(@users_move_order.last(2).first)
 			elsif non_corner?(@users_move_order.last)
-				selection_index = touch_non_corner(@users_move_order.last)
+				selection_index = go_touch_non_corner(@users_move_order.last)
 
 			# if they go corner, pick a corner unless control middle
 			elsif (@comp_board[4] == 0) && corner?(@users_move_order.last)
@@ -130,7 +146,6 @@ class TicTacToe
 		puts "I've won #{@@comp_wins} times"
 		puts "We've played #{@@total_games} times"
 		puts "-----------------------------------"
-		#@@user_start *= -1
 	end
 
 	private
@@ -179,14 +194,15 @@ class TicTacToe
 				@game_ended = true
 				message = "COMPUTER WINS...*yawn*...give up yet?"
 			elsif @turns_taken == 9
-				@game_ended = true
 				@@total_games += 1
+				@game_ended = true
 				message = "TIE GAME. Nobody wins."
 			else
 				return nil
 			end
 			puts "-----------------------------------"
 			puts message
+			@@user_start *= -1
 		end
 
 
@@ -245,10 +261,10 @@ class TicTacToe
 			return corner_spots.include?(move_position)
 		end
 
-		def go_corner
+		def go_corner(skip = [])
 			corner = [0, 2, 6, 8].shuffle
 			corner.each do |x|
-				return x if @available[x]
+				return x if @available[x] && (skip.include?(x) == false)
 			end
 			return nil
 		end
@@ -258,15 +274,41 @@ class TicTacToe
 			return non_corner_spots.include?(move_position)
 		end
 
-		def go_non_corner
+		def go_non_corner(skip = [])
 			non_corner = [1, 3, 5, 7].shuffle
 			non_corner.each do |x|
-				return x if @available[x]
+				return x if @available[x] && (skip.include?(x) == false)
 			end
 			return nil
 		end
 
-		def touch_non_corner(move_position)
+		def touch_array(move_position)
+			touching_moves = []
+
+			case move_position
+			when 0
+				touching_moves << 1 << 3
+			when 1
+				touching_moves << 0 << 2 << 4
+			when 2
+				touching_moves << 1 << 5
+			when 3
+				touching_moves << 0 << 4 << 6
+			when 4
+				touching_moves << 1 << 3 << 5 << 7
+			when 5
+				touching_moves << 2 << 4 << 8
+			when 6
+				touching_moves << 3 << 7
+			when 7
+				touching_moves << 4 << 6 << 8
+			when 8
+				touching_moves << 5 << 7
+			end
+			return touching_moves
+		end
+
+		def go_touch_non_corner(move_position)
 			moves = []
 
 			case move_position
