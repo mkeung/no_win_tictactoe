@@ -13,7 +13,7 @@ class TicTacToe
 		@comp_board = [0,0,0,0,0,0,0,0,0]
 		@game_ended = false
 		@turns_taken = 0
-		@users_move_order = []
+		@users_move_order = Array.new
 	end
 
 	def display
@@ -72,7 +72,7 @@ class TicTacToe
 		end
 
 		# -- offensive play (go 1st)
-		# go corner on first move
+		# go corner on first move *TODO note: can win with middle first, but less likely
 		if (@@user_start == -1) && selection_index.nil?
 			if @turns_taken == 0
 				selection_index = go_corner
@@ -83,6 +83,7 @@ class TicTacToe
 
 
 			# if opponent picks non corner, adjacent corner not touching opponent's move then middle
+			# go_corner accepts an array of positions to skip
 			elsif non_corner?(@users_move_order.first)
 				case @turns_taken
 				when 2
@@ -106,10 +107,10 @@ class TicTacToe
 
 			# if they go non corner, pick something that touches their move
 			# note: account for a non corner on 1st move
-			elsif non_corner?(@users_move_order.last(2).first) && @turns_taken == 3
-				selection_index = go_touch_non_corner(@users_move_order.last(2).first)
+			elsif non_corner?(@users_move_order.first) && @turns_taken == 3
+				selection_index = go_corner([], touch_array(@users_move_order.first))
 			elsif non_corner?(@users_move_order.last)
-				selection_index = go_touch_non_corner(@users_move_order.last)
+				selection_index = go_corner([], touch_array(@users_move_order.last))
 
 			# if they go corner, pick a corner unless control middle
 			elsif (@comp_board[4] == 0) && corner?(@users_move_order.last)
@@ -261,10 +262,10 @@ class TicTacToe
 			return corner_spots.include?(move_position)
 		end
 
-		def go_corner(skip = [])
+		def go_corner(skip = [], within = [0,1,2,3,4,5,6,7,8])
 			corner = [0, 2, 6, 8].shuffle
 			corner.each do |x|
-				return x if @available[x] && (skip.include?(x) == false)
+				return x if @available[x] && (skip.include?(x) == false) && (within.include?(x) == true)
 			end
 			return nil
 		end
@@ -274,10 +275,10 @@ class TicTacToe
 			return non_corner_spots.include?(move_position)
 		end
 
-		def go_non_corner(skip = [])
+		def go_non_corner(skip = [], within = [0,1,2,3,4,5,6,7,8])
 			non_corner = [1, 3, 5, 7].shuffle
 			non_corner.each do |x|
-				return x if @available[x] && (skip.include?(x) == false)
+				return x if @available[x] && (skip.include?(x) == false) && (within.include?(x) == true)
 			end
 			return nil
 		end
@@ -307,32 +308,6 @@ class TicTacToe
 			end
 			return touching_moves
 		end
-
-		def go_touch_non_corner(move_position)
-			moves = []
-
-			case move_position
-			when 1
-				moves << 0 if @available[0]
-				moves << 2 if @available[2]
-			when 3
-				moves << 0 if @available[0]
-				moves << 6 if @available[6]
-			when 5
-				moves << 2 if @available[2]
-				moves << 8 if @available[8]
-			when 7
-				moves << 6 if @available[6]
-				moves << 8 if @available[8]
-			end
-
-			if moves.empty?
-				return nil
-			else
-				return moves.shuffle.first
-			end
-		end
-
 
 end
 
